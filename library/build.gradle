@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
 
+group='com.github.umarhussain15'
 ext {
     PUBLISH_GROUP_ID = 'com.cunoraz.tagview'
     PUBLISH_ARTIFACT_ID = 'android-tagview'
