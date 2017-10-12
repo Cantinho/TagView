@@ -29,6 +29,8 @@ public class Constants {
 	public static final String DEFAULT_TAG_DELETE_ICON = "×";
 	public static final boolean DEFAULT_TAG_IS_DELETABLE = false;
 
+	public static final boolean DEFAULT_HORIZONTAL_SCROLL = false;
+
 
 	private Constants() throws InstantiationException {
 		throw new InstantiationException("This class is not for instantiation");
