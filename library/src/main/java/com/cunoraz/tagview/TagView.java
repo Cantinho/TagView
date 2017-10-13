@@ -15,37 +15,36 @@ import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class TagView extends RelativeLayout {
 
     /**
-     * tag list
+     * tagItem list
      */
-    private List<Tag> mTags = new ArrayList<>();
+    private List<TagItem> tagItemList = new ArrayList<>();
 
     /**
      * System Service
      */
     private LayoutInflater mInflater;
 
-    private ViewTreeObserver mViewTreeObserber;
+    private ViewTreeObserver mViewTreeObserver;
 
     /**
      * listeners
      */
-    private OnTagClickListener mClickListener;
+    private OnTagItemClickListener tagItemClickListener;
 
-    private OnTagDeleteListener mDeleteListener;
+    private OnTagItemDeleteListener tagItemDeleteListener;
 
-    private OnTagLongClickListener mTagLongClickListener;
+    private OnTagItemLongClickListener tagItemLongClickListener;
 
     /**
      * view size param
      */
-    private int mWidth;
+    private int tagViewWidth;
 
     /**
      * layout initialize flag
@@ -53,14 +52,14 @@ public class TagView extends RelativeLayout {
     private boolean layoutInitialized = false;
 
     /**
-     * margin value between rows of tags for multiline tagview
+     * margin value between rows of tags for multiline tagView
      */
     private int lineMargin;
 
     /**
      * Margin between two tags
      */
-    private int tagMargin;
+    private int tagItemMargin;
 
     /**
      * tag text padding left
@@ -85,7 +84,7 @@ public class TagView extends RelativeLayout {
     /**
      * boolean to keep all tags in same row or add new rows
      */
-    private boolean horizontalScrollable=false;
+    private boolean horizontalScrollable;
 
 
     public TagView(Context context) {
@@ -110,8 +109,8 @@ public class TagView extends RelativeLayout {
      */
     private void initialize(Context context, AttributeSet attrs, int defStyle) {
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mViewTreeObserber = getViewTreeObserver();
-        mViewTreeObserber.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        mViewTreeObserver = getViewTreeObserver();
+        mViewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 if (!layoutInitialized) {
@@ -124,27 +123,19 @@ public class TagView extends RelativeLayout {
         // get AttributeSet
         TypedArray typeArray = context.obtainStyledAttributes(attrs, R.styleable.TagView, defStyle, defStyle);
         this.lineMargin = (int) typeArray.getDimension(R.styleable.TagView_lineMargin, Utils.dipToPx(this.getContext(), Constants.DEFAULT_LINE_MARGIN));
-        this.tagMargin = (int) typeArray.getDimension(R.styleable.TagView_tagMargin, Utils.dipToPx(this.getContext(), Constants.DEFAULT_TAG_MARGIN));
+        this.tagItemMargin = (int) typeArray.getDimension(R.styleable.TagView_tagItemMargin, Utils.dipToPx(this.getContext(), Constants.DEFAULT_TAG_MARGIN));
         this.textPaddingLeft = (int) typeArray.getDimension(R.styleable.TagView_textPaddingLeft, Utils.dipToPx(this.getContext(), Constants.DEFAULT_TAG_TEXT_PADDING_LEFT));
         this.textPaddingRight = (int) typeArray.getDimension(R.styleable.TagView_textPaddingRight, Utils.dipToPx(this.getContext(), Constants.DEFAULT_TAG_TEXT_PADDING_RIGHT));
         this.textPaddingTop = (int) typeArray.getDimension(R.styleable.TagView_textPaddingTop, Utils.dipToPx(this.getContext(), Constants.DEFAULT_TAG_TEXT_PADDING_TOP));
         this.textPaddingBottom = (int) typeArray.getDimension(R.styleable.TagView_textPaddingBottom, Utils.dipToPx(this.getContext(), Constants.DEFAULT_TAG_TEXT_PADDING_BOTTOM));
-        this.horizontalScrollable= (boolean) typeArray.getBoolean(R.styleable.TagView_horizontalScrollable,Constants.DEFAULT_HORIZONTAL_SCROLL);
+        this.horizontalScrollable= typeArray.getBoolean(R.styleable.TagView_horizontalScrollable,Constants.DEFAULT_LAYOUT_HORIZONTAL_SCROLL);
         typeArray.recycle();
     }
 
-    /**
-     * onSizeChanged
-     *
-     * @param w
-     * @param h
-     * @param oldw
-     * @param oldh
-     */
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mWidth = w;
+        tagViewWidth = w;
     }
 
     @Override
@@ -153,7 +144,7 @@ public class TagView extends RelativeLayout {
         int width = getMeasuredWidth();
         if (width <= 0)
             return;
-        mWidth = getMeasuredWidth();
+        tagViewWidth = getMeasuredWidth();
     }
 
     @Override
@@ -186,34 +177,34 @@ public class TagView extends RelativeLayout {
         int firstTagInLineId = 1;
 
         // previous tag holder
-        Tag tagPre = null;
+        TagItem tagItemPre = null;
 
         // loop through tags list and add one by one to view
-        for (Tag item : mTags) {
+        for (TagItem item : tagItemList) {
             final int position = listIndex - 1;
-            final Tag tag = item;
+            final TagItem tagItem = item;
 
-            // inflate tag layout
+            // inflate tagItem layout
             View tagLayout = mInflater.inflate(R.layout.tagview_item, null);
-            // set id of the tag
+            // set id of the tagItem
             tagLayout.setId(listIndex);
 
-            tagLayout.setBackground(getSelector(tag));
+            tagLayout.setBackground(getSelector(tagItem));
 
-            // tag text
+            // tagItem text
             TextView tagView = tagLayout.findViewById(R.id.tv_tag_item_contain);
-            tagView.setText(tag.getText());
+            tagView.setText(tagItem.getText());
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) tagView.getLayoutParams();
             params.setMargins(textPaddingLeft, textPaddingTop, textPaddingRight, textPaddingBottom);
             tagView.setLayoutParams(params);
-            tagView.setTextColor(tag.getTagTextColor());
-            tagView.setTextSize(TypedValue.COMPLEX_UNIT_SP, tag.getTagTextSize());
+            tagView.setTextColor(tagItem.getTagTextColor());
+            tagView.setTextSize(TypedValue.COMPLEX_UNIT_SP, tagItem.getTagTextSize());
 
             tagLayout.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mClickListener != null) {
-                        mClickListener.onTagClick(tag, position);
+                    if (tagItemClickListener != null) {
+                        tagItemClickListener.onTagClick(tagItem, position);
                     }
                 }
             });
@@ -221,54 +212,54 @@ public class TagView extends RelativeLayout {
             tagLayout.setOnLongClickListener(new OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    if (mTagLongClickListener != null) {
-                        mTagLongClickListener.onTagLongClick(tag, position);
+                    if (tagItemLongClickListener != null) {
+                        tagItemLongClickListener.onTagLongClick(tagItem, position);
                     }
                     return true;
                 }
             });
 
-            // calculate　of tag layout width including the left and right padding
-            float tagWidth = tagView.getPaint().measureText(tag.getText()) + textPaddingLeft + textPaddingRight;
+            // calculate　of tagItem layout width including the left and right padding
+            float tagWidth = tagView.getPaint().measureText(tagItem.getText()) + textPaddingLeft + textPaddingRight;
 
-            // deletable text view config, if set deletable
+            // deletable text view config, if deletable set true
             TextView deletableView = tagLayout.findViewById(R.id.tv_tag_item_delete);
-            if (tag.isDeletable()) {
+            if (tagItem.isDeletable()) {
                 deletableView.setVisibility(View.VISIBLE);
-                deletableView.setText(tag.getDeleteIcon());
+                deletableView.setText(tagItem.getDeleteIndicator());
                 // offset between text and the delete button
                 int offset = Utils.dipToPx(getContext(), 2f);
                 deletableView.setPadding(offset, textPaddingTop, textPaddingRight + offset, textPaddingBottom);
 
                 // set the color of delete indicator
-                deletableView.setTextColor(tag.getDeleteIndicatorColor());
-                deletableView.setTextSize(TypedValue.COMPLEX_UNIT_SP, tag.getDeleteIndicatorSize());
+                deletableView.setTextColor(tagItem.getDeleteIndicatorColor());
+                deletableView.setTextSize(TypedValue.COMPLEX_UNIT_SP, tagItem.getDeleteIndicatorSize());
 
                 // attach delete listener to the deletable view
                 deletableView.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (mDeleteListener != null) {
-                            mDeleteListener.onTagDeleted(TagView.this, tag, position);
+                        if (tagItemDeleteListener != null) {
+                            tagItemDeleteListener.onTagDeleted(TagView.this, tagItem, position);
                         }
                     }
                 });
 
-                // add the width of deletable view to the tag width including padding
-                tagWidth += deletableView.getPaint().measureText(tag.getDeleteIcon()) + textPaddingLeft + textPaddingRight;
+                // add the width of deletable view to the tagItem width including padding
+                tagWidth += deletableView.getPaint().measureText(tagItem.getDeleteIndicator()) + textPaddingLeft + textPaddingRight;
             }
 
-            // params for adding tag to the tag view
+            // params for adding tagItem to the tagItem view
             LayoutParams tagParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
             //add margin of each line
             tagParams.bottomMargin = lineMargin;
 
-            //need to add in new line in tag view
-            if (!horizontalScrollable && mWidth <= total + tagWidth + Utils.dipToPx(this.getContext(), Constants.LAYOUT_WIDTH_OFFSET)) {
+            //need to add in new line in tagItem view
+            if (!horizontalScrollable && tagViewWidth <= total + tagWidth + Utils.dipToPx(this.getContext(), Constants.LAYOUT_WIDTH_OFFSET)) {
 
                 // check if there is already a line, add a below rule.
-                if (tagPre != null)
+                if (tagItemPre != null)
                     tagParams.addRule(RelativeLayout.BELOW, anchorTagId);
                 // initialize total param (layout padding left & layout padding right)
                 total = getPaddingLeft() + getPaddingRight();
@@ -281,71 +272,79 @@ public class TagView extends RelativeLayout {
                 //not header of the line
                 if (listIndex != firstTagInLineId) {
                     tagParams.addRule(RelativeLayout.RIGHT_OF, listIndex - 1);
-                    tagParams.leftMargin = tagMargin;
-                    total += tagMargin;
-                    // if we have a new tag whose height is greater than last greatest tag set that tag as anchor
-                    if (tagPre.getTagTextSize() < tag.getTagTextSize()) {
+                    tagParams.leftMargin = tagItemMargin;
+                    total += tagItemMargin;
+                    // if we have a new tagItem whose height is greater than last greatest tagItem set that tagItem as anchor
+                    if (tagItemPre.getTagTextSize() < tagItem.getTagTextSize()) {
                         anchorTagId = listIndex;
                     }
                 }
             }
             total += tagWidth;
             addView(tagLayout, tagParams);
-            tagPre = tag;
+            tagItemPre = tagItem;
             listIndex++;
         }
     }
 
-    private Drawable getSelector(Tag tag) {
-        if (tag.getBackground() != null)
-            return tag.getBackground();
+    /**
+     * get the drawable to be set for the tag item
+     * @param tagItem tag item for which drawable is needed.
+     * @return drawable to be set as background.
+     */
+    private Drawable getSelector(TagItem tagItem) {
+        if (tagItem.getBackground() != null)
+            return tagItem.getBackground();
 
         StateListDrawable states = new StateListDrawable();
         GradientDrawable gdNormal = new GradientDrawable();
-        gdNormal.setColor(tag.getLayoutColor());
-        gdNormal.setCornerRadius(tag.getBorderRadius());
-        if (tag.getLayoutBorderSize() > 0) {
-            gdNormal.setStroke(Utils.dipToPx(getContext(), tag.getLayoutBorderSize()), tag.getLayoutBorderColor());
+        gdNormal.setColor(tagItem.getLayoutColor());
+        gdNormal.setCornerRadius(tagItem.getBorderRadius());
+        if (tagItem.getLayoutBorderSize() > 0) {
+            gdNormal.setStroke(Utils.dipToPx(getContext(), tagItem.getLayoutBorderSize()), tagItem.getLayoutBorderColor());
         }
         GradientDrawable gdPress = new GradientDrawable();
-        gdPress.setColor(tag.getLayoutColorPress());
-        gdPress.setCornerRadius(tag.getBorderRadius());
+        gdPress.setColor(tagItem.getLayoutColorPress());
+        gdPress.setCornerRadius(tagItem.getBorderRadius());
         states.addState(new int[]{android.R.attr.state_pressed}, gdPress);
         //must add state_pressed first，or state_pressed will not take effect
         states.addState(new int[]{}, gdNormal);
         return states;
     }
 
+    /**
+     * add single tag item to tag view
+     * @param tagItem tag item with all properties set.
+     */
+    public void add(TagItem tagItem) {
 
-    //public methods
-    //----------------- separator  -----------------//
+        tagItemList.add(tagItem);
+        drawTags();
+    }
 
     /**
-     * @param tag
+     * add multiple tag items at once.
+     * @param tagItems list of all tags to add
      */
-    public void addTag(Tag tag) {
-
-        mTags.add(tag);
-        drawTags();
-    }
-
-    public void addTags(List<Tag> tags) {
-        if (tags == null) return;
-        mTags = new ArrayList<>();
-        if (tags.isEmpty())
+    public void add(List<TagItem> tagItems) {
+        if (tagItems == null) return;
+        tagItemList = new ArrayList<>();
+        if (tagItems.isEmpty())
             drawTags();
-        for (Tag item : tags) {
-            mTags.add(item);
-        }
+        tagItemList.addAll(tagItems);
         drawTags();
     }
 
 
-    public void addTags(String[] tags) {
+    /**
+     * create tag items from string array using defa
+     * @param tags array of strings
+     */
+    public void add(String[] tags) {
         if (tags == null) return;
         for (String item : tags) {
-            Tag tag = new Tag(item);
-            mTags.add(tag);
+            TagItem tagItem = new TagItem(getContext(),item);
+            tagItemList.add(tagItem);
         }
         drawTags();
     }
@@ -353,30 +352,28 @@ public class TagView extends RelativeLayout {
 
     /**
      * get tag list
-     *
-     * @return mTags TagObject List
+     * @return tagItemList TagObject List
      */
-    public List<Tag> getTags() {
-        return mTags;
+    public List<TagItem> getTagItemList() {
+        return tagItemList;
     }
 
     /**
-     * remove tag
-     *
-     * @param position
+     * remove single tag with position of the tag in the list
+     * @param tagItemPosition position of tag to be removed
      */
-    public void remove(int position) {
-        if (position < mTags.size()) {
-            mTags.remove(position);
+    public void remove(int tagItemPosition) {
+        if (tagItemPosition < tagItemList.size()) {
+            tagItemList.remove(tagItemPosition);
             drawTags();
         }
     }
 
     /**
-     * remove all views
+     * remove all tag item views
      */
     public void removeAll() {
-        mTags.clear(); //clear all of tags
+        tagItemList.clear();
         removeAllViews();
     }
 
@@ -388,12 +385,12 @@ public class TagView extends RelativeLayout {
         this.lineMargin = Utils.dipToPx(getContext(), lineMargin);
     }
 
-    public int getTagMargin() {
-        return tagMargin;
+    public int getTagItemMargin() {
+        return tagItemMargin;
     }
 
-    public void setTagMargin(float tagMargin) {
-        this.tagMargin = Utils.dipToPx(getContext(), tagMargin);
+    public void setTagItemMargin(float tagItemMargin) {
+        this.tagItemMargin = Utils.dipToPx(getContext(), tagItemMargin);
     }
 
     public int getTextPaddingLeft() {
@@ -437,44 +434,44 @@ public class TagView extends RelativeLayout {
     }
 
     /**
-     * setter for OnTagLongClickListener
+     * setter for OnTagItemLongClickListener
      *
-     * @param longClickListener
+     * @param tagItemLongClickListener
      */
-    public void setOnTagLongClickListener(OnTagLongClickListener longClickListener) {
-        mTagLongClickListener = longClickListener;
+    public void setOnTagLongClickListener(OnTagItemLongClickListener tagItemLongClickListener) {
+        this.tagItemLongClickListener = tagItemLongClickListener;
     }
 
     /**
      * setter for OnTagSelectListener
      *
-     * @param clickListener
+     * @param tagItemClickListener
      */
-    public void setOnTagClickListener(OnTagClickListener clickListener) {
-        mClickListener = clickListener;
+    public void setOnTagClickListener(OnTagItemClickListener tagItemClickListener) {
+        this.tagItemClickListener = tagItemClickListener;
     }
 
     /**
-     * setter for OnTagDeleteListener
+     * setter for OnTagItemDeleteListener
      *
-     * @param deleteListener
+     * @param tagItemDeleteListener
      */
-    public void setOnTagDeleteListener(OnTagDeleteListener deleteListener) {
-        mDeleteListener = deleteListener;
+    public void setOnTagDeleteListener(OnTagItemDeleteListener tagItemDeleteListener) {
+        this.tagItemDeleteListener = tagItemDeleteListener;
     }
 
     /**
      * Listeners
      */
-    public interface OnTagDeleteListener {
-        void onTagDeleted(TagView view, Tag tag, int position);
+    public interface OnTagItemDeleteListener {
+        void onTagDeleted(TagView view, TagItem tagItem, int position);
     }
 
-    public interface OnTagClickListener {
-        void onTagClick(Tag tag, int position);
+    public interface OnTagItemClickListener {
+        void onTagClick(TagItem tagItem, int position);
     }
 
-    public interface OnTagLongClickListener {
-        void onTagLongClick(Tag tag, int position);
+    public interface OnTagItemLongClickListener {
+        void onTagLongClick(TagItem tagItem, int position);
     }
 }

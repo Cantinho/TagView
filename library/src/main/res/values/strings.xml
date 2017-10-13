@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">TagView</string>
+    <string name="default_delete_icon">×</string>
 </resources>

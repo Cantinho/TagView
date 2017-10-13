@@ -9,11 +9,10 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.cunoraz.tagview.Tag;
+import com.cunoraz.tagview.TagItem;
 import com.cunoraz.tagview.TagView;
 
 import org.json.JSONArray;
@@ -31,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText editText;
 
-
     /**
      * sample country list
      */
@@ -42,8 +40,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tagGroup = (TagView) findViewById(R.id.tag_group);
-        editText = (EditText) findViewById(R.id.editText);
+        tagGroup = findViewById(R.id.tag_group);
+        editText = findViewById(R.id.editText);
 
         prepareTags();
 
@@ -64,32 +62,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        tagGroup.setOnTagLongClickListener(new TagView.OnTagLongClickListener() {
+        tagGroup.setOnTagLongClickListener(new TagView.OnTagItemLongClickListener() {
             @Override
-            public void onTagLongClick(Tag tag, int position) {
-                Toast.makeText(MainActivity.this, "Long Click: " + tag.getText(), Toast.LENGTH_SHORT).show();
+            public void onTagLongClick(TagItem tagItem, int position) {
+                Toast.makeText(MainActivity.this, "Long Click: " + tagItem.getText(), Toast.LENGTH_SHORT).show();
             }
         });
 
-        tagGroup.setOnTagClickListener(new TagView.OnTagClickListener() {
+        tagGroup.setOnTagClickListener(new TagView.OnTagItemClickListener() {
             @Override
-            public void onTagClick(Tag tag, int position) {
-                editText.setText(tag.getText());
-                editText.setSelection(tag.getText().length());//to set cursor position
+            public void onTagClick(TagItem tagItem, int position) {
+                editText.setText(tagItem.getText());
+                editText.setSelection(tagItem.getText().length());//to set cursor position
 
             }
         });
-        tagGroup.setOnTagDeleteListener(new TagView.OnTagDeleteListener() {
+        tagGroup.setOnTagDeleteListener(new TagView.OnTagItemDeleteListener() {
 
             @Override
-            public void onTagDeleted(final TagView view, final Tag tag, final int position) {
+            public void onTagDeleted(final TagView view, final TagItem tagItem, final int position) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setMessage("\"" + tag.getText() + "\" will be delete. Are you sure?");
+                builder.setMessage("\"" + tagItem.getText() + "\" will be delete. Are you sure?");
                 builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         view.remove(position);
-                        Toast.makeText(MainActivity.this, "\"" + tag.getText() + "\" deleted", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "\"" + tagItem.getText() + "\" deleted", Toast.LENGTH_SHORT).show();
                     }
                 });
                 builder.setNegativeButton("No", null);
@@ -123,26 +121,26 @@ public class MainActivity extends AppCompatActivity {
          * for empty edittext
          */
         if (cs.toString().equals("")) {
-            tagGroup.addTags(new ArrayList<Tag>());
+            tagGroup.add(new ArrayList<TagItem>());
             return;
         }
 
         String text = cs.toString();
-        ArrayList<Tag> tags = new ArrayList<>();
-        Tag tag;
+        ArrayList<TagItem> tagItems = new ArrayList<>();
+        TagItem tagItem;
 
 
         for (int i = 0; i < tagList.size(); i++) {
             if (tagList.get(i).getName().toLowerCase().startsWith(text.toLowerCase())) {
-                tag = new Tag(tagList.get(i).getName());
-                tag.setBorderRadius(10f);
-                tag.setLayoutColor(Color.parseColor(tagList.get(i).getColor()));
+                tagItem = new TagItem(getBaseContext(),tagList.get(i).getName());
+                tagItem.setBorderRadius(10f);
+                tagItem.setLayoutColor(Color.parseColor(tagList.get(i).getColor()));
                 if (i % 2 == 0) // you can set deletable or not
-                    tag.setDeletable(true);
-                tags.add(tag);
+                    tagItem.setDeletable(true);
+                tagItems.add(tagItem);
             }
         }
-        tagGroup.addTags(tags);
+        tagGroup.add(tagItems);
 
     }
 
