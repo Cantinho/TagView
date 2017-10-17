@@ -8,5 +8,6 @@
         <attr name="textPaddingTop" format="dimension" />
         <attr name="textPaddingBottom" format="dimension" />
         <attr name="horizontalScrollable" format="boolean" />
+        <attr name="tagItemCenterVertical" format="boolean" />
     </declare-styleable>
 </resources>

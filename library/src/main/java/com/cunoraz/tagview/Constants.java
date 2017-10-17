@@ -36,6 +36,8 @@ public class Constants {
 
     public static final float DEFAULT_TAG_RADIUS_PIXELS = 100;;
 
+    public static boolean DEFAULT_TAG_ITEM_CENTER_VERTICAL =false;
+
 
     private Constants() throws InstantiationException {
         throw new InstantiationException("This class is not for instantiation");

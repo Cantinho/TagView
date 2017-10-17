@@ -86,6 +86,8 @@ public class TagView extends RelativeLayout {
      */
     private boolean horizontalScrollable;
 
+    private boolean tagItemCenterVertical;
+
 
     public TagView(Context context) {
         this(context, null, 0);
@@ -129,6 +131,7 @@ public class TagView extends RelativeLayout {
         this.textPaddingTop = (int) typeArray.getDimension(R.styleable.TagView_textPaddingTop, Utils.dipToPx(this.getContext(), Constants.DEFAULT_TAG_TEXT_PADDING_TOP));
         this.textPaddingBottom = (int) typeArray.getDimension(R.styleable.TagView_textPaddingBottom, Utils.dipToPx(this.getContext(), Constants.DEFAULT_TAG_TEXT_PADDING_BOTTOM));
         this.horizontalScrollable= typeArray.getBoolean(R.styleable.TagView_horizontalScrollable,Constants.DEFAULT_LAYOUT_HORIZONTAL_SCROLL);
+        this.tagItemCenterVertical= typeArray.getBoolean(R.styleable.TagView_tagItemCenterVertical,Constants.DEFAULT_TAG_ITEM_CENTER_VERTICAL);
         typeArray.recycle();
     }
 
@@ -269,6 +272,8 @@ public class TagView extends RelativeLayout {
             //no need to new line
             else {
                 tagParams.addRule(RelativeLayout.ALIGN_TOP, firstTagInLineId);
+                if(tagItemCenterVertical)
+                tagParams.addRule(RelativeLayout.CENTER_VERTICAL);
                 //not header of the line
                 if (listIndex != firstTagInLineId) {
                     tagParams.addRule(RelativeLayout.RIGHT_OF, listIndex - 1);
@@ -458,6 +463,10 @@ public class TagView extends RelativeLayout {
      */
     public void setOnTagDeleteListener(OnTagItemDeleteListener tagItemDeleteListener) {
         this.tagItemDeleteListener = tagItemDeleteListener;
+    }
+
+    public void setTagItemCenterVertical(boolean tagItemCenterVertical) {
+        this.tagItemCenterVertical = tagItemCenterVertical;
     }
 
     /**
