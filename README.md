@@ -1,12 +1,10 @@
 # Android TagView
 Android TagView-HashTagView
 
-[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-TagView-green.svg?style=flat)](https://android-arsenal.com/details/1/2566)
-<br><br>Xamarin version, written by <a href = "https://github.com/fernandolopes">@fernandolopes</a><br>
-https://github.com/fernandolopes/Xamarin.Android.TagView
+Fork of <a href = "https://github.com/Cutta/TagView">TagView Library</a> from <a href = "https://github.com/Cutta">@Cutta</a>
 
 Simple android view to display collection of colorful tags efficiently.
-You can edit the tag's style, and set listener of selecting or deleting tag. 
+You can edit the tag's style, and set listener of tag selection, long press and deletion.
 Example usages can be found in example project.
 
 # Screen
@@ -19,7 +17,7 @@ Example usages can be found in example project.
 * Editable Style of Tag, Background/Pressed Color, Radius effect, Custom Background, Delete mode.
 * Listener of tag selecting and deleting.
 * Can be created from XML file or Java code.
-
+* Support for horizontal or vertical append
 # Gradle
  ``` java
 repositories {
@@ -30,7 +28,7 @@ repositories {
  ```
  ``` java
 dependencies {
-    compile 'com.github.Cutta:TagView:1.3'
+    compile 'com.github.umarhussain15:TagView:2.1'
 }
  ```
 # Usage
